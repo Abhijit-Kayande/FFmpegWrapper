@@ -31,9 +31,19 @@ NSString const *kFFmpegInputFormatKey = @"kFFmpegInputFormatKey";
     }
     
     // It's possible to send more options to the parser
-    // av_dict_set(&inputOptions, "video_size", "640x480", 0);
-    // av_dict_set(&inputOptions, "pixel_format", "rgb24", 0);
-    // av_dict_free(&inputOptions); // Don't forget to free
+    
+    
+    
+    
+    //av_dict_set(&inputOptions, "s", "320x240", 0);
+//    av_dict_set(&inputOptions, "pixel_format", "rgb24", 0);
+//    av_dict_free(&inputOptions); // Don't forget to free
+    
+//    AVDictionaryEntry *e;
+//    if (e = av_dict_get(inputOptions, "", NULL, AV_DICT_IGNORE_SUFFIX)) {
+//        fprintf(stderr, "Option %s not recognized by the demuxer.\n", e->key);
+//        //abort();
+//    }
     
     int openInputValue = avformat_open_input(&inputFormatContext, [inputPath UTF8String], inputFormat, &inputOptions);
     if (openInputValue != 0) {
@@ -41,11 +51,14 @@ NSString const *kFFmpegInputFormatKey = @"kFFmpegInputFormatKey";
         return nil;
     }
     
-    int streamInfoValue = avformat_find_stream_info(inputFormatContext, NULL);
+    int streamInfoValue = avformat_find_stream_info(inputFormatContext, &inputOptions);
     if (streamInfoValue < 0) {
         avformat_close_input(&inputFormatContext);
         return nil;
     }
+    
+//    av_dict_free(&inputOptions);
+    
     return inputFormatContext;
 }
 
