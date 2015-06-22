@@ -68,12 +68,106 @@
 - (void) setupDirectStreamCopyFromInputFile:(FFInputFile*)inputFile outputFile:(FFOutputFile*)outputFile {
     // Set the output streams to be the same as input streams
     NSUInteger inputStreamCount = inputFile.streams.count;
+    
+    NSLog(@"Input Stream Count:%lu",(unsigned long)inputFile.streams.count);
+    
+    
     for (int i = 0; i < inputStreamCount; i++) {
         FFInputStream *inputStream = [inputFile.streams objectAtIndex:i];
         FFOutputStream *outputStream = [[FFOutputStream alloc] initWithOutputFile:outputFile outputCodec:[inputStream codecName]];
+        NSLog(@"Input Codec Name:%@",[inputStream codecName]);
         AVCodecContext *inputCodecContext = inputStream.stream->codec;
         AVCodecContext *outputCodecContext = outputStream.stream->codec;
+        //[outputStream setupVideoContextWithWidth:400 height:400];
         avcodec_copy_context(outputCodecContext, inputCodecContext);
+        //[outputStream setupVideoContextWithWidth:400 height:400];
+        
+        
+        
+//        
+//        
+//        enum AVCodecID codecID = job->format->video_codec;
+//        
+//        // initialize audio context
+//        AVCodec ** codec = &job->videoCodec;
+//        AVCodecContext ** codecContext = &job->videoCodecContext;
+//        AVStream ** stream = &job->videoStream;
+//        
+//        /*** Initialize Encoder ***/
+//        
+//        // make sure that we have a format codec linked up
+//        if (codecID == AV_CODEC_ID_NONE) ;//handle errors here
+//        
+//        // now build out the codec encoder
+//        *codec = avcodec_find_encoder(codecID);
+//        
+//        // if the stream isn't created, then go ahead and throw an error
+//        if (!(*codec)) ;//handle errors here
+//        
+//        // now create the video stream
+//        *stream = avformat_new_stream(job->context, *codec);
+//        
+//        // note that the context now has one more stream attached to it
+//        // now iitialize the stream id
+//        (*stream)->id = job->context->nb_streams - 1;
+//        
+//        // now cache the codec pointer -- remember this is a pointer to a pointer
+//        *codecContext = (*stream)->codec;
+//        
+//        // now link up the correct pixel format etc -- this should change in the future
+//        //grab defaults for the codec given the format we are inputting
+//        avcodec_get_context_defaults3(*codecContext, *codec);
+//        
+//        // now copy over any attributes needed etc
+//        (*codecContext)->bit_rate = encodingJob->videoBitrate;
+//        
+//        // fixed this issue without any major hickups
+//        /*(*codecContext)->bit_rate_tolerance = 8000;*/
+//        
+//        // now copy over the various trivial assets / figures over
+//        (*codecContext)->width = encodingJob->width;
+//        (*codecContext)->height = encodingJob->height;
+//        
+//        // set pixel format needed for this element
+//        (*codecContext)->pix_fmt = AV_PIX_FMT_YUV420P; // initialize pixel format
+//        
+//        // now initialize frame rate elements
+//        // note that for fixed frame rate video time_base = fps/1
+//        (*codecContext)->time_base.num = encodingJob->fps.num;
+//        (*codecContext)->time_base.den = encodingJob->fps.den;
+//        
+//        // initialize gop_size
+//        (*codecContext)->gop_size = encodingJob->gop_size;
+//        
+//        // set frame rate tolerance
+//        (*codecContext)->bit_rate_tolerance = 256000;
+//        
+//        // now initialize any further elements needed for creating the stream
+//        // manual switches for mpeg2ts
+//        if ((*codecContext)->codec_id == AV_CODEC_ID_MPEG2VIDEO)
+//            (*codecContext)->max_b_frames = 2;
+//        
+//        // switch for mpeg1video to ensure that we have macro blocks controlled
+//        if ((*codecContext)->codec_id == AV_CODEC_ID_MPEG1VIDEO)
+//            (*codecContext)->mb_decision = 2;
+//        
+//        // now initialize the stream  headers if necessary
+//        if (job->format->flags && AVFMT_GLOBALHEADER)
+//            (*codecContext)->flags |= CODEC_FLAG_GLOBAL_HEADER;
+//        
+//        
+//        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 }
 
@@ -85,7 +179,7 @@
     }
 }
 
-- (void) convertInputPath:(NSString*)inputPath outputPath:(NSString*)outputPath options:(NSDictionary*)options progressBlock:(FFmpegWrapperProgressBlock)progressBlock completionBlock:(FFmpegWrapperCompletionBlock)completionBlock {
+- (void) convertInputPath:(NSString*)inputPath outputPath:(NSString*)outputPath segmentDuration:(int)segDuration options:(NSDictionary*)options progressBlock:(FFmpegWrapperProgressBlock)progressBlock completionBlock:(FFmpegWrapperCompletionBlock)completionBlock {
     dispatch_async(conversionQueue, ^{
         FFInputFile *inputFile = nil;
         FFOutputFile *outputFile = nil;
@@ -104,6 +198,8 @@
         
         // Open output format context
         outputFile = [[FFOutputFile alloc] initWithPath:outputPath options:options];
+        
+        [outputFile setSegmentDuration:segDuration];
         
         // Copy settings from input context to output context for direct stream copy
         [self setupDirectStreamCopyFromInputFile:inputFile outputFile:outputFile];
@@ -141,6 +237,7 @@
             packet->dts = av_rescale_q(packet->dts, inputStream.stream->time_base, outputStream.stream->time_base);
             
             totalBytesRead += packet->size;
+            
             
             if (![outputFile writePacket:packet error:&error]) {
                 [self finishWithSuccess:NO error:error completionBlock:completionBlock];
