@@ -33,4 +33,6 @@
 // must call this when finished writing
 - (BOOL) writeTrailerWithError:(NSError**)error;
 
+@property(nonatomic) int segmentDuration;
+
 @end
