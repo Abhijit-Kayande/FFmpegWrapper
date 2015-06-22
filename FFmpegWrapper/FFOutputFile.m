@@ -19,7 +19,7 @@ NSString const *kFFmpegOutputFormatKey = @"kFFmpegOutputFormatKey";
 @end
 
 @implementation FFOutputFile
-@synthesize startTime, formatContext, bitstreamFilters;
+@synthesize startTime, formatContext, bitstreamFilters,segmentDuration;
 
 - (void) addBitstreamFilter:(FFBitstreamFilter *)bitstreamFilter {
     [bitstreamFilters addObject:bitstreamFilter];
@@ -63,8 +63,10 @@ NSString const *kFFmpegOutputFormatKey = @"kFFmpegOutputFormatKey";
 }
 
 - (BOOL) openFileForWritingWithError:(NSError *__autoreleasing *)error {
+   
     /* open the output file, if needed */
     if (!(formatContext->oformat->flags & AVFMT_NOFILE)) {
+        
         int returnValue = avio_open(&formatContext->pb, [self.path UTF8String], AVIO_FLAG_WRITE);
         if (returnValue < 0) {
             if (error != NULL) {
@@ -135,6 +137,7 @@ NSString const *kFFmpegOutputFormatKey = @"kFFmpegOutputFormatKey";
     AVStream *outputStream = ffOutputStream.stream;
     
     AVCodecContext *outputCodecContext = outputStream->codec;
+    
     
     //NSData *packetData = [NSData dataWithBytesNoCopy:packet->data length:packet->size freeWhenDone:NO];
     //NSLog(@"Org: %@", packetData);
