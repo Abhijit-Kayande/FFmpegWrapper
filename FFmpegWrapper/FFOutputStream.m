@@ -8,6 +8,7 @@
 
 #import "FFOutputStream.h"
 #import "FFOutputFile.h"
+#import "opt.h"
 
 @implementation FFOutputStream
 @synthesize lastMuxDTS, frameNumber;
@@ -21,8 +22,13 @@
         if (!codec) {
             NSLog(@"codec not found: %@", outputCodec);
         }
+        
+      
         self.stream = avformat_new_stream(outputFile.formatContext, codec);
         [outputFile addOutputStream:self];
+        av_opt_set_int(outputFile.formatContext->priv_data, "hls_time", outputFile.segmentDuration, 0);
+        av_opt_set_image_size(outputFile.formatContext->priv_data, "video_size", 400, 400, 0);
+        
     }
     return self;
 }
