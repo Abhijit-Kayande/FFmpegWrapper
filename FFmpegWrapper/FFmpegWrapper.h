@@ -82,6 +82,6 @@ extern NSString const *kFFmpegOutputFormatKey;
  @param progressBlock Defaults to the main queue.
  @param completionblock Defaults to the main queue.
  */
-- (void) convertInputPath:(NSString*)inputPath outputPath:(NSString*)outputPath options:(NSDictionary*)options progressBlock:(FFmpegWrapperProgressBlock)progressBlock completionBlock:(FFmpegWrapperCompletionBlock)completionBlock;
+- (void) convertInputPath:(NSString*)inputPath outputPath:(NSString*)outputPath segmentDuration:(int)segDuration options:(NSDictionary*)options progressBlock:(FFmpegWrapperProgressBlock)progressBlock completionBlock:(FFmpegWrapperCompletionBlock)completionBlock;
 
 @end
